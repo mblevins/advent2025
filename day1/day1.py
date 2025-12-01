@@ -6,28 +6,56 @@ import sys
 import logging
 
 class DialClass:
-    # Note: since we're just counting zeros, there's no
-    # need to track turn under/overflows
     DIAL_MAX=100
 
     def __init__( self ):
         self.pos=50
-        self.num_zero_pos=0
+        self.num_simple_zeros=0
+        self.num_any_zeros=0
 
-    def turn( self, dir, clicks ):
-        if (dir == "L"):
-            self.pos = self.pos - clicks
-        elif (dir == "R"):
-            self.pos = self.pos + clicks
+    def turn( self, clicks ):
+
+        # makes it easier if we normalize
+        num_extra_turns=abs(int( clicks / self.DIAL_MAX ))
+        if (clicks > 0):
+            clicks=clicks - num_extra_turns * self.DIAL_MAX
         else:
-            raise Exception( f"*** Internal error, *turn* called with dir={dir}")
+            clicks=clicks + num_extra_turns * self.DIAL_MAX
 
-        logging.debug( f"DialClass.turn, dir={dir}, clicks={clicks}, pos={self.pos}")
-        if (self.pos % self.DIAL_MAX == 0):
-                self.num_zero_pos = self.num_zero_pos + 1
+        new_pos = self.pos + clicks
 
-    def get_num_zeros( self ):
-        return( self.num_zero_pos )
+        did_rotate=False   
+        # landing on zero is a special case, else check if we're high or low
+        if (new_pos % self.DIAL_MAX == 0):
+            self.num_simple_zeros = self.num_simple_zeros + 1
+            self.num_any_zeros = self.num_any_zeros + 1
+            new_pos = 0
+        else: 
+            if (new_pos < 0):
+                did_rotate=True
+                new_pos=new_pos + self.DIAL_MAX 
+            elif (new_pos >= self.DIAL_MAX):
+                did_rotate=True
+                new_pos=new_pos - self.DIAL_MAX 
+
+            # if we start on zero, it isn't a real rotation
+            if (did_rotate and self.pos != 0):
+                self.num_any_zeros = self.num_any_zeros + 1 
+
+        self.num_any_zeros = self.num_any_zeros + num_extra_turns
+            
+
+        logging.debug( f"DialClass.turn, clicks={clicks}, pos={self.pos}, " +
+                       f"num_extra_turns={num_extra_turns}, new_pos={new_pos}, did_rotate={did_rotate}, " +
+                       f"num_simple_zeros={self.num_simple_zeros}, num_any_zero={self.num_any_zeros}")
+        
+        self.pos = new_pos
+
+    def get_simple_zeros( self ):
+        return( self.num_simple_zeros )
+    
+    def get_any_zeros( self ):
+        return( self.num_any_zeros )
 
 def read_input( inputStream ):
     dial=DialClass()
@@ -39,10 +67,15 @@ def read_input( inputStream ):
         linematch=re.match(r"^([LR])(\d+)$",line)
         if (not linematch):
             raise Exception( f"*** line {line} not understood")
-        dial.turn( linematch.group(1), int(linematch.group(2)))
-    return( dial.get_num_zeros() )
+        if (linematch.group(1) == "L"):
+            clicks = - int(linematch.group(2))
+        else:
+            clicks = int(linematch.group(2))      
+        dial.turn( clicks )
+    return( dial )
 
 # main
 if __name__ == '__main__':
-    num_zeros=read_input( sys.stdin )
-    print(f"The number of times zero was landed on was {num_zeros}")
+    dial=read_input( sys.stdin )
+    print(f"The number of times zero was landed on was {dial.get_simple_zeros()}")
+    print(f"The number of times zero was passed on was {dial.get_any_zeros()}")
