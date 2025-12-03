@@ -18,10 +18,10 @@ test_data_trivial = '''
 def test_trivial():
     stream = io.StringIO(test_data_trivial)
     sum=read_input( stream )
-    assert(sum == 89)
+    assert(sum == 811111111119)
 
 def test_sample():
     stream = io.StringIO(test_data_sample)
     sum=read_input( stream )
-    assert(sum == 357)
+    assert(sum == 3121910778619)
 

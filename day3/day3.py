@@ -58,10 +58,9 @@ class JoltClass:
             h_values.append( current_high )
 
         sum=0
-        for i in range(0, max_match-1):
-            sum += h_values[i]
+        for i in range(0, max_match):
             sum = sum * 10
-        sum += h_values[max_match-1]
+            sum += h_values[i]
 
         logging.debug(f"bank_str={bank_str}, sum={sum}")
         return( sum )
@@ -75,7 +74,7 @@ def read_input( inputStream ):
             continue
 
         logging.debug(f"line={line}")
-        sum += jolt.find_largest_2( line )
+        sum += jolt.find_largest_N( line, 12 )
 
     return( sum )
 
