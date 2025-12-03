@@ -1,7 +1,6 @@
 # !/bin/python3
-# https://adventofcode.com/2025/day/2
+# https://adventofcode.com/2025/day/3
 
-import re
 import sys
 import logging
 
@@ -20,7 +19,7 @@ class JoltClass:
 
         # make a a multi pass scan, 1st for to find the largest
         # number(s), and 2nd for second highest,
-        # if two numbers are the same, take the first
+        # if two numbers are the same, stick with the first
         # skip the last number for the large check
         h1_value=0
         h1_index=0
@@ -45,12 +44,13 @@ class JoltClass:
 
         # make a multi pass scan, 1st for to find the largest
         # number(s), and 2nd for second highest
-        # if two numbers are the same, take the first
-        # skip the last numbers
+        # if two numbers are the same, stick with the first
         h_values=[]
         last_high_index=-1
         for n in range( 0, max_match ):
             current_high=0
+            # start just ahead of the last highest, and continue until 
+            # we have enough room for a viable match
             for i in range( last_high_index+1, len( bank )-max_match + n + 1 ):
                 if (bank[i] > current_high):
                     current_high=bank[i]

@@ -48,7 +48,7 @@ class ValidatorClass:
                 if (length % match_length != 0):
                     continue
                 # now march through the number looking for a match
-                # skip the index we can't match
+                # skip the indexes we can't match
                 matched=True
                 for i in range( 0, length - match_length, match_length):
                     #logging.debug(f"Checking {id} dl={match_length} i={i}")
