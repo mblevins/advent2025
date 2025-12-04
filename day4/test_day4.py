@@ -22,13 +22,9 @@ test_data_trivial = '''
 @@@.@.@.@@
 '''
 
-def tesxt_trivial():
-    stream = io.StringIO(test_data_trivial)
-    sum=read_input( stream )
-    assert(sum == 5)
 
 def test_sample():
     stream = io.StringIO(test_data_sample)
     sum=read_input( stream )
-    assert(sum == 13)
+    assert(sum == 43)
 
