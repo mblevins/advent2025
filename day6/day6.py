@@ -84,6 +84,6 @@ def read_input( inputStream, part):
 
 # main
 if __name__ == '__main__':
-    logging.basicConfig(level=getattr(logging, "DEBUG"))
+    #logging.basicConfig(level=getattr(logging, "DEBUG"))
     print(f"Total Operations are {read_input( sys.stdin, 2 )}")
 
