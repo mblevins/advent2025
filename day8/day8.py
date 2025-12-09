@@ -35,6 +35,7 @@ class JunctionClass:
 
     def __init__( self, matrix  ):
         self.junction_loc_array = np.array( matrix, dtype=int)
+        self.num_junctions=self.junction_loc_array.shape[0]
 
     # helper method
     def get_id( self, row_index ):
@@ -74,9 +75,11 @@ class JunctionClass:
         # Now walk through the sorted distances and match up circuits
         num_circuits=0
 
-        # list of CircuitClass 
+        # list of CircuitClass's
         circuit_dict={}
         conn_count=0
+
+
         for jp in junction_pairs:
 
             conn_count += 1
@@ -125,6 +128,80 @@ class JunctionClass:
         total = len( circuits[0].connections ) * len( circuits[1].connections ) * len( circuits[2].connections )
         return( total )
     
+    # part 2 total
+    def total_part_2( self ):
+
+        # build a list of pairs, indexed by pair id
+        junction_pair_dict={}
+        for r1_i in range( 0, len( self.junction_loc_array )):
+            for r2_i in range( 0, len( self.junction_loc_array )):
+                if (r1_i == r2_i):
+                    continue
+                r1_id = self.get_id( r1_i )
+                r2_id = self.get_id( r2_i )
+                pair_id = f"{r1_id}:{r2_id}"
+                reverse_id = f"{r2_id}:{r1_id}"
+                if reverse_id in junction_pair_dict:
+                    # already did this one the other direction
+                    continue
+                distance=round(np.linalg.norm(self.junction_loc_array[r1_i] - self.junction_loc_array[r2_i]))
+                junction_pair_dict[pair_id]=JunctionPairClass( r1_id, r2_id, distance )
+
+        # Now sort the dict by distance, we can toss the index now
+        junction_pairs = sorted(list(junction_pair_dict.values()), key=lambda item: item.distance)
+        junction_pair_dict=None
+
+        # Now walk through the sorted distances and match up circuits
+        num_circuits=0
+
+        # list of CircuitClass's
+        circuit_dict={}
+        total=0
+        for jp in junction_pairs:
+
+            # there's a test at the end of this loop checking for early termination
+
+            c1 = self.find_matching_circuit( circuit_dict, jp.j1 )
+            c2 = self.find_matching_circuit( circuit_dict, jp.j2 )
+
+            logging.debug(f"jp.j1={jp.j1}, jp.j2={jp.j2}")
+
+            if (c1 and c1 == c2):
+                # counts as a connection, but nothing to do
+                logging.debug(f" ... circuits {c1.id} and {c2.id} already in same circuit")
+            elif (c1):
+                if (c2):
+                    logging.debug(f" ... extending circuit {c1.id} with circuit {c2.id}")
+                    c1.extend_list(c2.connections)
+                    del circuit_dict[c2.id]
+                else:
+                    logging.debug(f" ... adding j2 to circuit {c1.id}")
+                    c1.add(jp.j2)
+            elif (c2):
+                # if we're here, c1 must be None
+                logging.debug(f" ... adding j1 to circuit {c2.id}")
+                c2.add(jp.j1)
+            else:
+                # neither c1 nor c2 are in curcuits, create a new circuit
+                circuit_id=f"C{num_circuits}"
+                logging.debug(f" ... Creating new circuit {circuit_id}")
+                circuit=CircuitClass( circuit_id )
+                circuit.add( jp.j1 )
+                circuit.add( jp.j2 )
+                circuit_dict[ circuit_id ] = circuit
+                num_circuits += 1
+            
+            # see if we're done
+            if (len(circuit_dict) == 1 and len(circuit_dict[list(circuit_dict.keys())[0]].connections) == self.num_junctions):
+                logging.debug(f"everything is connected, last circuit was {jp.j1} and {jp.j2}")
+                # kind hacky, but we'll just grab the x coord out of the id
+                x1 = int(jp.j1.split("/")[0])
+                x2 = int(jp.j2.split("/")[0])
+                total = x1 * x2
+                break
+
+        return( total )
+    
 
 def read_input( inputStream, part, max_conn):
     matrix=[]
@@ -136,10 +213,10 @@ def read_input( inputStream, part, max_conn):
     if (part == 1):
         return( junctions.total_part_1( max_conn ) )
     else:
-        return( junctions.total_part2( max_conn  ) )
+        return( junctions.total_part_2(  ) )
 
 # main
 if __name__ == '__main__':
     # logging.basicConfig(level=getattr(logging, "DEBUG"))
-    print(f"Total splits are {read_input( sys.stdin, 1, 1000)}")
+    print(f"Total for connections are {read_input( sys.stdin, 2, 1000)}")
 

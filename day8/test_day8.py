@@ -31,3 +31,9 @@ def test_sample_part1():
     total=read_input( stream, 1, 10 )
     assert(total == 40)
 
+def test_sample_part2():
+    stream = io.StringIO(test_data_sample)
+    total=read_input( stream, 2, 0 )
+    assert(total == 25272)
+
+
