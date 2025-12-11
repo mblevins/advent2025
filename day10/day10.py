@@ -32,7 +32,9 @@ class PanelLine:
                     light_state[li] = '.'
         return( light_state == self.needed_light_state )
     
-    # returns a list of lists
+    # returns a list of lists of all possible combos
+    # some of these are impossible (like 0,0,1) is the same as (1)
+    # but it costs the same to test them as to optimize them
     def all_combos_for_n( self, num_pushes ):
 
         num_buttons=len( self.buttons )
@@ -64,7 +66,6 @@ class PanelLine:
                     break
             if (success):
                 break
-
 
         if (not success):
             raise Exception("Didn't find any success combos")
