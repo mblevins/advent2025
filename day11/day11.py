@@ -9,12 +9,6 @@ from collections import deque
 from enum import Enum
 
 
-class PathState( Enum ):
-    PATH_UNKNOWN=1
-    PATH_SUCCEEDED=2
-    PATH_FAILED=3
-
-
 class PathAttempt:
 
     def __init__( self, device, out):
@@ -31,18 +25,8 @@ class DeviceClass:
     def add_line( self, device, outputs ):
         self.paths[device] = outputs
 
-    # returns None, True or False
-    def crossed_this_path( self, path_attempted, out ):
-        for pa in path_attempted:
-            if out in pa.history:
-                return( pa.path_state )
-        return( PathState.PATH_UNKNOWN )
-
-
     def find_out( self ):
 
-        # both are list of PathAttempt's 
-        paths_attempted=[]
         paths_todo=deque()
 
         for out in self.paths["you"]:
